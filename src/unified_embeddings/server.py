@@ -1,3 +1,4 @@
+from typing import Sequence
 from fastapi import FastAPI
 from unified_embeddings.model_router import create_model_router
 
@@ -11,17 +12,11 @@ from unified_embeddings.servable_embedder import ServableEmbedder
 logger = logging.getLogger("uvicorn.error")
 
 
-def app_factory(models: list[ServableEmbedder]) -> FastAPI:
+def app_factory(models: Sequence[ServableEmbedder]) -> FastAPI:
     app = FastAPI(
         title="Unified Embeddings",
         description="Provides a unified interface for various embdding models",
     )
-
-    logger.info("Loading models")
-    # TODO figure out how to supply specific models to load
-
-    print(models[0].model.model_card_data)
-    logger.info("Done loading models")
 
     for model in models:
         model_name = model.HF_NAME.split("/")[-1]

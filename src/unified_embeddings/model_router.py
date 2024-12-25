@@ -22,8 +22,8 @@ class Capabilities(BaseModel):
 class ModelInformation(BaseModel):
     model_name: str
     model_size: str
-    output_dimensions: int
-    max_sequence_length: int
+    output_dimensions: int | None
+    max_sequence_length: int | None
     tokenizer_info: TokenizerInformation
     device: str
     n_model_params: int
@@ -84,7 +84,7 @@ def create_model_router(model: ServableEmbedder) -> APIRouter:
         n_model_params=n_params,
         precision=precision,
         memory_usage=memory_usage_human_readable,
-        capabilities=model.capabilities,
+        capabilities=Capabilities.model_validate(model.capabilities),
     )
 
     if model.can_embed_documents:
@@ -97,20 +97,23 @@ def create_model_router(model: ServableEmbedder) -> APIRouter:
             Create embeddings for a text or list of texts.
             You can use this endpoint for matching texts to similar texts or for creating a database of embeddings to be used for retrieval.
             """
-            return model.embed_document(documents).tolist()
+            return model.embed_document(documents).tolist() # type: ignore
 
     if model.can_embed_queries:
 
         @router.post("/embed-queries")
         async def embed_query(
             queries: str | list[str],
+            instruction: str | None = None,
         ) -> list[float] | list[list[float]]:
             """
             Create embeddings for a text or list of texts.
             You can use this endpoint to create embeddings for queries to be used for retrieval.
             Use this when you match a query to a set of documents. Or a question to answers.
+            
+            When a model supports instructions, you can provide an instruction to the model to embed the queries.
             """
-            return model.embed_query(queries).tolist()
+            return model.embed_query(queries).tolist() # type: ignore
 
     if model.can_classify:
 
@@ -122,7 +125,7 @@ def create_model_router(model: ServableEmbedder) -> APIRouter:
             Create embeddings for a text or list of texts.
             The embeddings from this endpoint are suited to be used for downstream classification tasks.
             """
-            return model.classify(documents).tolist()
+            return model.classify(documents).tolist() # type: ignore
 
     if model.can_cluster:
 
@@ -134,21 +137,24 @@ def create_model_router(model: ServableEmbedder) -> APIRouter:
             Create embeddings for a text or list of texts.
             The embeddings from this endpoint are suited to be used for clustering tasks.
             """
-            return model.cluster(documents).tolist()
+            if isinstance(documents, str):
+                documents = [documents]
+                
+            return model.cluster(documents).tolist() # type: ignore
 
     if model.can_rerank:
 
         @router.post("/rerank")
         async def rerank(
-            documents: list[str], queries: str | list[str]
+            documents: list[str], queries: str | list[str], instruction: str | None = None
         ) -> list[float] | list[list[float]]:
             """
             Creates embeddings for documents and queries (assymtrically) and calculates the similarity between them.
             """
             document_embeddings = model.embed_document(documents)
-            query_embeddings = model.embed_query(queries)
+            query_embeddings = model.embed_query(queries, instruction)
 
-            return (query_embeddings @ document_embeddings.T).tolist()
+            return (query_embeddings @ document_embeddings.T).tolist() # type: ignore
 
     @router.get("/model_info", response_model=ModelInformation)
     async def model_info() -> ModelInformation:

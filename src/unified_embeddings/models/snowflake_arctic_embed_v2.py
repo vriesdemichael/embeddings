@@ -11,7 +11,3 @@ class SnowflakeArcticEmbedV2(ServableEmbedder):
     def embed_query(self, query: str | list[str]) -> ndarray:
         return self.model.encode(query, prompt_name="query")
 
-    def rerank(self, documents: list[str], queries: list[str]) -> ndarray:
-        query_embeddings = self.embed_query(queries)
-        document_embeddings = self.embed_document(documents)
-        return query_embeddings @ document_embeddings.T

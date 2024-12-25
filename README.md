@@ -31,34 +31,27 @@ This library abstracts the implementation details away and only provides endpoin
  
 
 ## Installation
-Instructions on how to install and set up the project.
+First make sure you have [UV](https://docs.astral.sh/uv/) available in your enviuronment
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/yourproject.git
+git clone https://github.com/vriesdemichael/unified-embeddings.git
 
 # Navigate to the project directory
-cd yourproject
+cd unified-embeddings
 
 # Install dependencies
-pip install -r requirements.txt
+uv sync
 ```
 
 ## Usage
-Examples and instructions on how to use the project.
+You can start the server using 
+`uv run python -m unified_embeddings` or `uv run unified-embeddings`
 
-```python
-import yourmodule
+or you can use 
+`uvicorn unified_embeddings.server:app_factory --factory --port 8000 --host "0.0.0.0"
 
-# Example usage
-yourmodule.yourfunction()
-```
 
-## Contributing
-Guidelines for contributing to the project.
+If you want to use your other models than the ones provided here please add them in the [models dir](./src/unified_embeddings/models)
 
-## License
-Information about the project's license.
-
-## Acknowledgements
-Credits and acknowledgements for those who contributed to the project.
+Implement the functions from [ServeableEmbedder](./src/unified_embeddings/servable_embedder.py) to set up how your embedding model deals with specific types of embeddings.

@@ -1,11 +1,10 @@
 from numpy import ndarray
 from sentence_transformers import SentenceTransformer
 
-single_or_multiple_str: type = str | list[str]
-
 
 class ServableEmbedder:
     HF_NAME = "sentinel"  # Must be overwritten by subclasses
+    uses_instructions = False  # If set to true the api will ask for instructions when embedding queries
 
     def __init__(self):
         if self.HF_NAME == "sentinel":
@@ -15,16 +14,16 @@ class ServableEmbedder:
             trust_remote_code=True,  # This is only the code that is supplied in the huggingface model repo. Not some remote code loaded at runtime.
         )
 
-    def embed_document(self, document: str | list[str]) -> ndarray:
+    def embed_document(self, documents: str | list[str]) -> ndarray:
         raise NotImplementedError("This method must be implemented by subclasses")
 
-    def embed_query(self, query: str | list[str]) -> ndarray:
+    def embed_query(self, query: str | list[str], instruction: str | None) -> ndarray:
         raise NotImplementedError("This method must be implemented by subclasses")
 
     def classify(self, documents: str | list[str]) -> ndarray:
         raise NotImplementedError("This method must be implemented by subclasses")
 
-    def cluster(self, documents: list) -> ndarray:
+    def cluster(self, documents: list[str]) -> ndarray:
         raise NotImplementedError("This method must be implemented by subclasses")
 
     @property

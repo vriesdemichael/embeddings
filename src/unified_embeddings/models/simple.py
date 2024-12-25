@@ -1,3 +1,4 @@
+from numpy import ndarray
 from sentence_transformers import SentenceTransformer
 from unified_embeddings.servable_embedder import ServableEmbedder
 
@@ -12,5 +13,5 @@ class SimpleModel(ServableEmbedder):
         self.HF_NAME = model_name
         self.model = SentenceTransformer(model_name)
 
-    def embed_document(self, document: str | list[str]) -> list[float]:
+    def embed_document(self, document: str | list[str]) -> ndarray:
         return self.model.encode(document)
